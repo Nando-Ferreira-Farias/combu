@@ -15,6 +15,8 @@ jobs:
         run: docker build -f docker/Dockerfile -t combu:ci .
       - name: Start it
         run: |
+          # pg_regress runs as the container's postgres user and writes its results in test/.
+          chmod -R a+w test
           docker run -d --name combu -e POSTGRES_PASSWORD=secret -p 5432:5432 \
             -v "$PWD":/combu combu:ci
           # The image restarts PostgreSQL once after its first initialisation.
