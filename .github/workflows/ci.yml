@@ -5,6 +5,7 @@ on:
     branches: [main]
     tags: ["v*"]
   pull_request:
+  workflow_dispatch: # run by hand, e.g. to republish the site
 
 jobs:
   extension:
