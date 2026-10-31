@@ -29,4 +29,8 @@ Then `CREATE EXTENSION combu CASCADE;` in a database. Restore backups in a singl
 | `clients/python/` | combu-py, the Python client |
 | `docs/` | the documentation site (Zensical, published to GitHub Pages) |
 
-Documentation: [docs/index.md](docs/index.md), with install, the data model, the SQL reference, backups, development and the decisions behind the design.
+Documentation: <https://nando-ferreira-farias.github.io/combu/> (source in [docs/](docs/index.md)): install, the data model, the SQL reference, backups, development and the decisions behind the design.
+
+## License
+
+combu is released under the [PostgreSQL License](LICENSE), the same permissive license as PostgreSQL itself.

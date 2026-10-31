@@ -4,6 +4,10 @@
 [project]
 site_name = "combu"
 site_description = "A temporal, multi-source entity registry for PostgreSQL."
+site_url = "https://nando-ferreira-farias.github.io/combu/"
+repo_url = "https://github.com/Nando-Ferreira-Farias/combu"
+repo_name = "Nando-Ferreira-Farias/combu"
+copyright = "Copyright &copy; 2026 Nando Farias. PostgreSQL License."
 docs_dir = "docs"
 site_dir = "site"
 nav = [

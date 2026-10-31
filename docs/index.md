@@ -31,7 +31,7 @@ SELECT * FROM registry.hierarchy_tree('admin');   -- the tree as it was then
 |---|---|
 | **combu**, the extension | the `registry` and `asof` schemas: tables, constraints, triggers and functions |
 | **Domain extensions** | PostgreSQL extensions that require combu and add a subject's structure (planned: `combu_geo`, `combu_power`) |
-| **Clients** | thin libraries; [combu-py](https://github.com/<owner>/combu/tree/main/clients/python) is the first |
+| **Clients** | thin libraries; [combu-py](https://github.com/Nando-Ferreira-Farias/combu/tree/main/clients/python) is the first |
 | **Applications** | projects that use combu, such as an energy-market analysis |
 
 ## Where to go next

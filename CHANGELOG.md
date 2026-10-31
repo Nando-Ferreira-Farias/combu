@@ -18,3 +18,4 @@ registry started.
   and cycles.
 - Every data table and identity sequence is registered for `pg_dump`.
 - combu-py 0.1.0: installs, updates and inspects the extension (`combu install|status`).
+- Released under the PostgreSQL License.

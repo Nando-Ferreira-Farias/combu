@@ -1,4 +1,4 @@
--- combu 0.1.0: the entity registry core (https://github.com/<owner>/combu).
+-- combu 0.1.0: the entity registry core (https://github.com/Nando-Ferreira-Farias/combu).
 --
 -- Install with CREATE EXTENSION combu CASCADE (it requires btree_gist and postgis). This
 -- script creates the registry schema (tables, functions, triggers) and the asof schema, which

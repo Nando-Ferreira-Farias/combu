@@ -3,11 +3,16 @@ name = "combu"
 version = "0.1.0"
 description = "Python client for combu, a temporal, multi-source entity registry for PostgreSQL"
 readme = "README.md"
+license = "PostgreSQL"
 requires-python = ">=3.14"
 dependencies = [
     "psycopg[binary]>=3.3.6",
     "sqlalchemy>=2.1.4",
 ]
+
+[project.urls]
+Homepage = "https://nando-ferreira-farias.github.io/combu/"
+Source = "https://github.com/Nando-Ferreira-Farias/combu"
 
 [project.scripts]
 combu = "combu.__main__:main"

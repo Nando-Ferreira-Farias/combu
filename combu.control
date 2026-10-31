@@ -1,4 +1,4 @@
-# combu: a temporal, multi-source entity registry (https://github.com/<owner>/combu)
+# combu: a temporal, multi-source entity registry (https://github.com/Nando-Ferreira-Farias/combu)
 comment = 'Temporal, multi-source entity registry: entities, claims, hierarchies and their history'
 default_version = '0.1.0'
 requires = 'btree_gist, postgis'
