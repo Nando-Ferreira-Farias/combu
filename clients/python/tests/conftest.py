@@ -1,4 +1,4 @@
-"""combu-py's tests need nothing from summary. Integration tests create their own database,
+"""Integration tests create their own database,
 `combu_test`, on the server DATABASE_URL points at (default: the local Compose database)."""
 
 import os

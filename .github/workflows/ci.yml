@@ -1,0 +1,66 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+
+jobs:
+  extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Build the image (PostgreSQL 18 + TimescaleDB + PostGIS + combu)
+        run: docker build -f docker/Dockerfile -t combu:ci .
+      - name: Start it
+        run: |
+          docker run -d --name combu -e POSTGRES_PASSWORD=secret -p 5432:5432 \
+            -v "$PWD":/combu combu:ci
+          # The image restarts PostgreSQL once after its first initialisation.
+          sleep 10
+          until docker exec combu pg_isready -U postgres -q; do sleep 1; done
+          docker exec -u root combu bash -c 'apt-get update -qq && apt-get install -y -qq make'
+      - name: Regression tests
+        run: docker exec -w /combu combu make installcheck PGUSER=postgres
+      - name: Show regression differences
+        if: failure()
+        run: cat test/regression.diffs || true
+      - name: Dump and restore
+        run: docker exec -w /combu -e PGUSER=postgres combu make dumpcheck
+      - uses: astral-sh/setup-uv@v10
+      - name: combu-py
+        working-directory: clients/python
+        env:
+          DATABASE_URL: postgresql+psycopg://postgres:secret@localhost:5432/postgres
+        run: |
+          uv sync --locked
+          uv run ruff check .
+          uv run ruff format --check .
+          uv run mypy
+          uv run pytest
+
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: astral-sh/setup-uv@v10
+      - run: uvx zensical==0.0.70 build --strict --clean
+      - if: github.ref == 'refs/heads/main'
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: site
+
+  pages:
+    if: github.ref == 'refs/heads/main'
+    needs: [extension, docs]
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

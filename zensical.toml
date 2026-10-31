@@ -1,0 +1,75 @@
+# combu's documentation site (https://zensical.org), published to GitHub Pages by CI.
+# Build locally: uvx zensical==0.0.70 build --strict (output: site/, ignored); serve: `serve`.
+
+[project]
+site_name = "combu"
+site_description = "A temporal, multi-source entity registry for PostgreSQL."
+docs_dir = "docs"
+site_dir = "site"
+nav = [
+  { "Home" = "index.md" },
+  { "Install" = "install.md" },
+  { "Data model" = "model.md" },
+  { "SQL reference" = "reference.md" },
+  { "Backups" = "backups.md" },
+  { "Development" = "development.md" },
+  { "Roadmap" = "roadmap.md" },
+  { "Decisions" = [
+    "decisions/index.md",
+    { "0001 Temporal entity registry" = "decisions/0001-temporal-entity-registry.md" },
+    { "0002 Several sources per fact" = "decisions/0002-several-sources-per-fact.md" },
+    { "0003 A SQL core" = "decisions/0003-sql-core.md" },
+    { "0004 A PostgreSQL extension" = "decisions/0004-postgres-extension.md" },
+  ] },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.code.copy",
+  "content.tabs.link",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.markdown_extensions]
+abbr = {}
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+tables = {}
+toc.permalink = true
+pymdownx.details = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.magiclink = {}
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+pymdownx.tasklist.custom_checkbox = true

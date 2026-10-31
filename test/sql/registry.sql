@@ -1,0 +1,89 @@
+-- The core's rules on a small catalog: countries and regions, two sources.
+SET client_min_messages = warning;
+SET TIME ZONE 'UTC';
+SET datestyle = 'ISO, YMD';
+\set VERBOSITY terse
+
+CREATE FUNCTION pg_temp.id(entity_key text) RETURNS bigint LANGUAGE sql AS
+  $$ SELECT id FROM registry.entity WHERE key = entity_key $$;
+
+INSERT INTO registry.entity_type (code, name, is_abstract) VALUES ('area', 'Area', true);
+INSERT INTO registry.entity_type (code, name, parent_id)
+SELECT code, name, (SELECT id FROM registry.entity_type WHERE code = 'area')
+FROM (VALUES ('country', 'Country'), ('region', 'Region')) v (code, name);
+INSERT INTO registry.hierarchy (code, name) VALUES ('admin', 'Administrative division');
+INSERT INTO registry.hierarchy_rule (hierarchy_id, parent_type_id, child_type_id)
+SELECT (SELECT id FROM registry.hierarchy WHERE code = 'admin'),
+       (SELECT id FROM registry.entity_type WHERE code = r.parent),
+       (SELECT id FROM registry.entity_type WHERE code = r.child)
+FROM (VALUES (NULL, 'country'), ('country', 'region')) r (parent, child);
+
+-- Two sources: a (curated, priority 0) wins over b (a source, priority 100).
+INSERT INTO registry.dataset (key, kind, priority) VALUES ('a', 'curated', 0), ('b', 'source', 100);
+INSERT INTO registry.entity (type_id, key, name, lifetime)
+SELECT (SELECT id FROM registry.entity_type WHERE code = v.type), v.key, v.name, v.lifetime::tstzrange
+FROM (VALUES
+  ('country', 'x', 'X', '(,)'),
+  ('country', 'y', 'Y', '(,)'),
+  ('region', 'x.r1', 'R1', '[2000-01-01,)'),
+  ('region', 'x.r2', 'R2', '[2010-01-01,)')) v (type, key, name, lifetime);
+
+INSERT INTO registry.hierarchy_edge (hierarchy_id, child_id, valid, parent_id, dataset_id)
+SELECT (SELECT id FROM registry.hierarchy WHERE code = 'admin'), pg_temp.id(e.child),
+       e.valid::tstzrange, pg_temp.id(e.parent), (SELECT id FROM registry.dataset WHERE key = e.dataset)
+FROM (VALUES
+  ('x', NULL, '(,)', 'a'),
+  ('y', NULL, '(,)', 'a'),
+  ('x.r1', 'x', '[2000-01-01,2008-01-01)', 'a'),
+  ('x.r1', 'y', '[2005-01-01,)', 'b'),
+  ('x.r2', 'x', '[2010-01-01,)', 'a')) e (child, parent, valid, dataset);
+
+-- Each child's edge comes from the highest-priority source in force: a until 2008, then b.
+SELECT ts, c.key AS child, p.key AS parent, d.key AS dataset
+FROM unnest(ARRAY['2006-01-01', '2009-01-01']::timestamptz[]) ts,
+     LATERAL registry.hierarchy_edges('admin', ts) e
+JOIN registry.entity c ON c.id = e.child_id
+JOIN registry.entity p ON p.id = e.parent_id
+JOIN registry.dataset d ON d.id = e.dataset_id
+WHERE c.key = 'x.r1' ORDER BY ts;
+
+SELECT e.key, t.depth
+FROM registry.hierarchy_tree('admin', '2012-01-01') t JOIN registry.entity e ON e.id = t.entity_id
+ORDER BY t.depth, e.key;
+
+SELECT a.key FROM registry.entity a
+WHERE a.id = registry.entity_ancestor(pg_temp.id('x.r1'), 'admin', 'country', '2006-01-01');
+
+SELECT set_config('combu.as_of', '2006-01-01', false);
+SELECT registry.as_of();
+
+-- What the database refuses.
+INSERT INTO registry.entity (type_id, key, name, lifetime)
+VALUES ((SELECT id FROM registry.entity_type WHERE code = 'area'), 'z', 'Z', '(,)');
+
+INSERT INTO registry.hierarchy_edge (hierarchy_id, child_id, valid, parent_id, dataset_id)
+VALUES ((SELECT id FROM registry.hierarchy WHERE code = 'admin'), pg_temp.id('x.r1'),
+        '[2001-01-01,2002-01-01)', pg_temp.id('y'), (SELECT id FROM registry.dataset WHERE key = 'a'));
+
+INSERT INTO registry.hierarchy_edge (hierarchy_id, child_id, valid, parent_id, dataset_id)
+VALUES ((SELECT id FROM registry.hierarchy WHERE code = 'admin'), pg_temp.id('x.r2'),
+        '[2005-01-01,2006-01-01)', pg_temp.id('y'), (SELECT id FROM registry.dataset WHERE key = 'b'));
+
+INSERT INTO registry.hierarchy_edge (hierarchy_id, child_id, valid, parent_id, dataset_id)
+VALUES ((SELECT id FROM registry.hierarchy WHERE code = 'admin'), pg_temp.id('y'),
+        '[2020-01-01,)', pg_temp.id('x.r2'), (SELECT id FROM registry.dataset WHERE key = 'b'));
+
+INSERT INTO registry.hierarchy_rule (hierarchy_id, parent_type_id, child_type_id)
+SELECT h.id, t.id, t.id FROM registry.hierarchy h, registry.entity_type t
+WHERE h.code = 'admin' AND t.code = 'region';
+INSERT INTO registry.hierarchy_edge (hierarchy_id, child_id, valid, parent_id, dataset_id)
+VALUES ((SELECT id FROM registry.hierarchy WHERE code = 'admin'), pg_temp.id('x.r1'),
+        '[2030-01-01,)', pg_temp.id('x.r2'), (SELECT id FROM registry.dataset WHERE key = 'a')),
+       ((SELECT id FROM registry.hierarchy WHERE code = 'admin'), pg_temp.id('x.r2'),
+        '[2030-01-01,)', pg_temp.id('x.r1'), (SELECT id FROM registry.dataset WHERE key = 'b'));
+
+INSERT INTO registry.entity_alias (scheme, code, valid, entity_id, dataset_id)
+VALUES ('iso', 'X', '(,)', pg_temp.id('x'), (SELECT id FROM registry.dataset WHERE key = 'a')),
+       ('iso', 'X', '[2020-01-01,)', pg_temp.id('y'), (SELECT id FROM registry.dataset WHERE key = 'b'));
+
+UPDATE registry.entity SET lifetime = '[2009-01-01,)' WHERE key = 'x.r1';

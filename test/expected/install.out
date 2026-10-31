@@ -1,0 +1,55 @@
+-- CREATE EXTENSION installs the requirements and creates the registry and asof schemas.
+SET client_min_messages = warning;
+CREATE EXTENSION combu CASCADE;
+SELECT extversion FROM pg_extension WHERE extname = 'combu';
+ extversion 
+------------
+ 0.1.0
+(1 row)
+
+SELECT extname FROM pg_extension WHERE extname IN ('btree_gist', 'postgis') ORDER BY 1;
+  extname   
+------------
+ btree_gist
+ postgis
+(2 rows)
+
+SELECT nspname FROM pg_namespace WHERE nspname IN ('registry', 'asof') ORDER BY 1;
+ nspname  
+----------
+ asof
+ registry
+(2 rows)
+
+SELECT tablename FROM pg_tables WHERE schemaname = 'registry' ORDER BY 1;
+    tablename    
+-----------------
+ dataset
+ entity
+ entity_alias
+ entity_claim
+ entity_geometry
+ entity_type
+ hierarchy
+ hierarchy_edge
+ hierarchy_rule
+(9 rows)
+
+SELECT p.proname
+FROM pg_proc p JOIN pg_namespace n ON n.oid = p.pronamespace
+WHERE n.nspname = 'registry' ORDER BY 1;
+         proname         
+-------------------------
+ as_of
+ edge_check
+ entity_ancestor
+ entity_ancestors
+ entity_check
+ entity_descendants
+ entity_type_descendants
+ entity_type_lineage
+ hierarchy_edges
+ hierarchy_tree
+ require_type
+(11 rows)
+

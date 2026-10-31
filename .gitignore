@@ -1,0 +1,12 @@
+# pg_regress output
+test/results/
+test/regression.diffs
+test/regression.out
+# Python
+__pycache__/
+.venv/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+# Docs build
+site/
