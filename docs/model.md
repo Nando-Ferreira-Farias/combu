@@ -27,7 +27,7 @@ erDiagram
 | `hierarchy_rule` | an allowed (parent type, child type) pair; a NULL parent marks a root; subtypes match | |
 | `hierarchy_edge` | "according to `dataset`, during `valid`, `child`'s parent is `parent`" | `(hierarchy_id, child_id, dataset_id, valid WITHOUT OVERLAPS)` |
 | `entity_alias` | another system's code for an entity | `(scheme, code, valid WITHOUT OVERLAPS)` |
-| `entity_geometry` | a shape: `location`, `boundary` or simplified `display` | `(entity_id, role, dataset_id, valid WITHOUT OVERLAPS)` |
+| `entity_geometry` | a shape: `location`, `boundary` (full detail) or `display_10m`, `display_50m`, `display_110m` (lighter, named after the map scales 1:10M, 1:50M and 1:110M) | `(entity_id, role, dataset_id, valid WITHOUT OVERLAPS)` |
 
 Domain extensions and applications add three kinds of table, all keyed to `registry.entity`:
 

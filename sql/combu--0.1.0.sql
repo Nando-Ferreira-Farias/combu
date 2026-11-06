@@ -110,7 +110,7 @@ CREATE TABLE registry.entity_geometry (
     dataset_id SMALLINT NOT NULL,
     CONSTRAINT pk_entity_geometry PRIMARY KEY (entity_id, role, dataset_id, valid WITHOUT OVERLAPS),
     CONSTRAINT fk_entity_geometry_entity_id_entity FOREIGN KEY (entity_id, PERIOD valid) REFERENCES registry.entity (id, PERIOD lifetime) DEFERRABLE INITIALLY IMMEDIATE,
-    CONSTRAINT ck_entity_geometry_role CHECK (role IN ('location', 'boundary', 'display')),
+    CONSTRAINT ck_entity_geometry_role CHECK (role IN ('location', 'boundary', 'display_10m', 'display_50m', 'display_110m')),
     CONSTRAINT ck_entity_geometry_valid_not_empty CHECK (NOT isempty(valid)),
     CONSTRAINT fk_entity_geometry_dataset_id_dataset FOREIGN KEY(dataset_id) REFERENCES registry.dataset (id)
 );
